@@ -24,6 +24,5 @@ name = "sork"
 path = "examples/sork/main.rs"
 
 [dependencies]
-
-[workspace.lints.rust]
-unsafe_code = "forbid"
+anyhow = { version = "1.0.81", features = ["std", "backtrace"] }
+thiserror = "1.0.58"

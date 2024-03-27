@@ -23,9 +23,9 @@
 //! - Identify the requirements for that feature.
 //! - Implement the requirements in Saltshore.
 //! - Refactor the Sork code to use the Saltshore implementation.
-//!
+use saltshore::prelude::*;
 
-fn main() {
+fn main() -> Result<(), GameError> {
   println!(
     r#"
   SORK I: The Great Underground Empire
@@ -35,8 +35,9 @@ fn main() {
   Revision 1 / Serial number 12345
     "#
   );
-  // As a player, I need some semblance of a game loop so that I can play the
-  // game. See #6.
+  let game_loop = GameLoop {};
+  game_loop.run()?;
+  Ok(())
   // As a player, I need some game state so that I can interact with the game.
   // See #7.
   // As a player, I need to be able to enter commands so that I can interact
