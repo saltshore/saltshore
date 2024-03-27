@@ -18,6 +18,11 @@ path = "src/lib.rs"
 name = "saltshore"
 path = "src/main.rs"
 
+
+[[example]]
+name = "sork"
+path = "examples/sork/main.rs"
+
 [dependencies]
 
 [workspace.lints.rust]

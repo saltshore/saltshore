@@ -1,8 +1,7 @@
 name: 'Enhancement'
 description: 'File an enhancement ticket.'
 title: '[Enhancement]  '
-labels:
-  - ':hammer_and_wrench: Enhancement'
+labels: []
 projects:
   - 'saltshore/1'
 assignees:
