@@ -26,5 +26,13 @@
 //!
 
 fn main() {
-  println!("Hello, world!");
+  println!(
+    r#"
+  SORK I: The Great Underground Empire
+  Apologies and thanks to Tim Anderson, Marc Blank, Bruce Daniels, Dave Lebling,
+  and to everyone else who created the original ZORK and other Infocom games.
+  ZORK is a registered trademark of Infocom, Inc.
+  Revision 1 / Serial number 12345
+    "#
+  );
 }
