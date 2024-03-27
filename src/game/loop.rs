@@ -1,12 +1,23 @@
 use crate::game::error::GameError;
+use crate::game::state::GameState;
 
 /// The game loop.
 ///
 /// This struct defines the game loop for Saltshore.
-#[derive(Clone, Copy, Debug)]
-pub struct GameLoop {}
+#[derive(Clone, Copy, Debug, Default)]
+pub struct GameLoop {
+  /// The game state.
+  state: GameState,
+}
 
 impl GameLoop {
+  /// Create a new game loop.
+  pub fn new() -> Self {
+    Self {
+      state: GameState::default(),
+    }
+  }
+
   /// The actual game loop.
   pub fn run(&self) -> Result<(), GameError> {
     // Initialize game world, load assets, etc.
@@ -28,7 +39,7 @@ impl GameLoop {
 
   /// Determine if the game loop should exit.
   fn is_finished(&self) -> bool {
-    true
+    self.state.quit_flag
   }
 
   /// Initialize game world, load assets, etc.

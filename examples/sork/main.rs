@@ -35,11 +35,9 @@ fn main() -> Result<(), GameError> {
   Revision 1 / Serial number 12345
     "#
   );
-  let game_loop = GameLoop {};
+  let game_loop = GameLoop::default();
   game_loop.run()?;
   Ok(())
-  // As a player, I need some game state so that I can interact with the game.
-  // See #7.
   // As a player, I need to be able to enter commands so that I can interact
   // with the game. See #8.
   // As a player, I need to be able to see the game state so that I can
