@@ -1,5 +1,6 @@
 use crate::game::error::GameError;
 use crate::game::state::GameState;
+use std::io::{self, BufRead, Write};
 
 /// The game loop.
 ///
@@ -19,7 +20,7 @@ impl GameLoop {
   }
 
   /// The actual game loop.
-  pub fn run(&self) -> Result<(), GameError> {
+  pub fn run(&mut self) -> Result<(), GameError> {
     // Initialize game world, load assets, etc.
     self.setup()?;
     // The inner core of the game loop.
@@ -43,24 +44,39 @@ impl GameLoop {
   }
 
   /// Initialize game world, load assets, etc.
-  fn setup(&self) -> Result<(), GameError> {
+  fn setup(&mut self) -> Result<(), GameError> {
     Ok(())
   }
 
   /// Handle player commands or AI decisions.
-  fn process_input(&self) -> Result<(), GameError> {
+  fn process_input(&mut self) -> Result<(), GameError> {
+    let mut stdin = io::stdin().lock();
+    let mut buffer = String::new();
+    stdin.read_line(&mut buffer).unwrap();
+    match buffer.trim() {
+      "quit" => self.state.quit_flag = true,
+      "exit" => self.state.quit_flag = true,
+      _ => (),
+    }
     Ok(())
   }
   /// Update game state, NPC behaviors, environment changes, etc.
-  fn update(&self) -> Result<(), GameError> {
+  fn update(&mut self) -> Result<(), GameError> {
     Ok(())
   }
   /// Send updates to players or render the game state in some form.
-  fn process_output(&self) -> Result<(), GameError> {
+  fn process_output(&mut self) -> Result<(), GameError> {
+    println!(
+      "You are standing in an open field west of a white house, with a boarded
+    front door."
+    );
+    print!("> ");
+    io::stdout().flush().unwrap();
     Ok(())
   }
+
   /// Perform any necessary cleanup before the game loop exits.
-  fn teardown(&self) -> Result<(), GameError> {
+  fn teardown(&mut self) -> Result<(), GameError> {
     Ok(())
   }
 }
