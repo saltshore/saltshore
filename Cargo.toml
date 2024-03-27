@@ -1,0 +1,24 @@
+[package]
+name = "saltshore"
+version = "0.1.0"
+edition = "2021"
+authors = ["Nathan Douglas <github@darkdell.net>"]
+license = "Unlicense"
+homepage = "https://saltshore.github.io/saltshore/"
+repository = "https://github.com/saltshore/saltshore/"
+documentation = "https://saltshore.github.io/saltshore/"
+readme = "README.md"
+keywords = ["saltshore"]
+
+[lib]
+name = "saltshore"
+path = "src/lib.rs"
+
+[[bin]]
+name = "saltshore"
+path = "src/main.rs"
+
+[dependencies]
+
+[workspace.lints.rust]
+unsafe_code = "forbid"

@@ -1,0 +1,14 @@
+[book]
+authors = ["Nathan Douglas"]
+language = "en"
+multilingual = false
+src = "src"
+title = "SaltShore"
+description = "A companion book for SaltShore."
+create-missing = false
+
+[output.html]
+mathjax-support = true
+site-url = "/saltshore/"
+git-repository-url = "https://github.com/saltshore/saltshore.git"
+git-repository-icon = "fa-github"
