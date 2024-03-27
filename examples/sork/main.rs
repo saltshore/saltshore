@@ -35,4 +35,8 @@ fn main() {
   Revision 1 / Serial number 12345
     "#
   );
+  // As a player, I need some semblance of a game loop so that I can play the
+  // game. See #6.
+  // As a player, I need some game state so that I can interact with the game.
+  // See #7.
 }
