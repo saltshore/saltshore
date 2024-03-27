@@ -1,14 +1,14 @@
 //! Sork, an implementation of Zork using Saltshore.
 //!
-//! ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-//! ░░▒▓███████▓▒░░▒▓██████▓▒░░▒▓███████▓▒░░▒▓█▓▒░░▒▓█▓▒░░░
-//! ░▒▓█▓▒░░░░░░░░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░░░
-//! ░▒▓█▓▒░░░░░░░░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░░░
-//! ░░▒▓██████▓▒░░▒▓█▓▒░░▒▓█▓▒░▒▓███████▓▒░░▒▓███████▓▒░░░░
-//! ░░░░░░░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░░░
-//! ░░░░░░░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░░░
-//! ░▒▓███████▓▒░░░▒▓██████▓▒░░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░░░
-//! ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+//! ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+//! ░░░▒▓███████▓▒░░▒▓██████▓▒░░▒▓███████▓▒░░▒▓█▓▒░░▒▓█▓▒░░░
+//! ░░▒▓█▓▒░░░░░░░░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░░░
+//! ░░▒▓█▓▒░░░░░░░░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░░░
+//! ░░░▒▓██████▓▒░░▒▓█▓▒░░▒▓█▓▒░▒▓███████▓▒░░▒▓███████▓▒░░░░
+//! ░░░░░░░░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░░░
+//! ░░░░░░░░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░░░
+//! ░░▒▓███████▓▒░░░▒▓██████▓▒░░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░░░
+//! ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 //!
 //! Sork is as close as I can get to a direct port of Zork to Saltshore. It's
 //! a text adventure game where you can explore a world, solve puzzles, and
@@ -23,9 +23,10 @@
 //! - Identify the requirements for that feature.
 //! - Implement the requirements in Saltshore.
 //! - Refactor the Sork code to use the Saltshore implementation.
-//!
 
-fn main() {
+use saltshore::prelude::*;
+
+fn main() -> Result<(), GameError> {
   println!(
     r#"
   SORK I: The Great Underground Empire
@@ -35,13 +36,14 @@ fn main() {
   Revision 1 / Serial number 12345
     "#
   );
-  // As a player, I need some semblance of a game loop so that I can play the
-  // game. See #6.
-  // As a player, I need some game state so that I can interact with the game.
-  // See #7.
+  let mut game_loop = GameLoop::default();
+  game_loop.run()?;
+  Ok(())
   // As a player, I need to be able to enter commands so that I can interact
   // with the game. See #8.
   // As a player, I need to be able to see the game state so that I can
   // understand the game. See #9.
   // As an engineer, I need to be able to log so I can debug. See #10.
+  // As a player, I need to be able to quit so that I can exit the game. See
+  // #11.
 }
