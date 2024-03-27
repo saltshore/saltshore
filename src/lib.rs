@@ -36,10 +36,16 @@ extern crate anyhow;
 
 /// The game loop and game state.
 pub mod game;
+/// Basic input handling.
+pub mod input;
+/// Basic output handling.
+pub mod output;
 
 /// Prelude for the library.
 pub mod prelude {
   pub use crate::game::prelude::*;
+  pub use crate::input::prelude::*;
+  pub use crate::output::prelude::*;
 }
 
 #[cfg(test)]
