@@ -1,4 +1,4 @@
-![CI](https://github.com/saltshore/saltshore/actions/workflows/continuous_integration.yml/badge.svg?branch=main) [![codecov](https://codecov.io/gh/saltshore/saltshore/graph/badge.svg?token=5VGTF9HO0W)](https://codecov.io/gh/saltshore/saltshore) [![Book](https://github.com/saltshore/saltshore/actions/workflows/book.yml/badge.svg)](https://saltshore.github.io/saltshore/)
+![CI](https://github.com/saltshore/saltshore/actions/workflows/continuous_integration.yml/badge.svg?branch=main) [![Code Coverage](https://codecov.io/gh/saltshore/saltshore/graph/badge.svg?token=5VGTF9HO0W)](https://codecov.io/gh/saltshore/saltshore) [![Book](https://github.com/saltshore/saltshore/actions/workflows/book.yml/badge.svg)](https://saltshore.github.io/saltshore/)
 
 # SaltShore
 
