@@ -26,3 +26,6 @@ path = "examples/sork/main.rs"
 [dependencies]
 anyhow = { version = "1.0.81", features = ["std", "backtrace"] }
 thiserror = "1.0.58"
+
+[dev-dependencies]
+tempfile = "3.10.1"

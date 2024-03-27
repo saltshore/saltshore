@@ -1,14 +1,19 @@
 use crate::game::error::GameError;
 use crate::game::state::GameState;
-use std::io::{self, BufRead, Write};
+use crate::input::prelude::StdinReader;
+use crate::output::prelude::StdoutWriter;
 
 /// The game loop.
 ///
 /// This struct defines the game loop for Saltshore.
-#[derive(Clone, Copy, Debug, Default)]
+#[derive(Debug, Default)]
 pub struct GameLoop {
   /// The game state.
   state: GameState,
+  /// The input reader.
+  input: StdinReader,
+  /// The output writer.
+  output: StdoutWriter,
 }
 
 impl GameLoop {
@@ -16,6 +21,8 @@ impl GameLoop {
   pub fn new() -> Self {
     Self {
       state: GameState::default(),
+      input: StdinReader::default(),
+      output: StdoutWriter::default(),
     }
   }
 
@@ -50,9 +57,7 @@ impl GameLoop {
 
   /// Handle player commands or AI decisions.
   fn process_input(&mut self) -> Result<(), GameError> {
-    let mut stdin = io::stdin().lock();
-    let mut buffer = String::new();
-    stdin.read_line(&mut buffer).unwrap();
+    let buffer = self.input.read()?;
     match buffer.trim() {
       "quit" => self.state.quit_flag = true,
       "exit" => self.state.quit_flag = true,
@@ -66,12 +71,11 @@ impl GameLoop {
   }
   /// Send updates to players or render the game state in some form.
   fn process_output(&mut self) -> Result<(), GameError> {
-    println!(
-      "You are standing in an open field west of a white house, with a boarded
-    front door."
-    );
-    print!("> ");
-    io::stdout().flush().unwrap();
+    self
+      .output
+      .writeln("You are standing in an open field west of a white house, with a boarded front door.".to_string())?;
+    self.output.write("> ".to_string())?;
+    self.output.flush()?;
     Ok(())
   }
 
