@@ -2,6 +2,7 @@ use crate::game::error::GameError;
 use crate::game::state::GameState;
 use crate::input::prelude::StdinReader;
 use crate::output::prelude::StdoutWriter;
+use crate::parser::prelude::Parser;
 
 /// The game loop.
 ///
@@ -14,6 +15,8 @@ pub struct GameLoop {
   input: StdinReader,
   /// The output writer.
   output: StdoutWriter,
+  /// The parser.
+  parser: Parser,
 }
 
 impl GameLoop {
@@ -23,6 +26,7 @@ impl GameLoop {
       state: GameState::default(),
       input: StdinReader::default(),
       output: StdoutWriter::default(),
+      parser: Parser,
     }
   }
 
@@ -55,20 +59,27 @@ impl GameLoop {
     Ok(())
   }
 
-  /// Handle player commands or AI decisions.
+  /// Handle player commands.
   fn process_input(&mut self) -> Result<(), GameError> {
-    let buffer = self.input.read()?;
-    match buffer.trim() {
-      "quit" => self.state.quit_flag = true,
-      "exit" => self.state.quit_flag = true,
-      _ => (),
+    loop {
+      let buffer = self.input.read()?;
+      if let Ok(command) = self.parser.parse(&buffer) {
+        command.execute(&mut self.state);
+        break;
+      } else {
+        self.output.writeln("Invalid command.".to_string())?;
+        self.output.write("> ".to_string())?;
+        self.output.flush()?;
+      }
     }
     Ok(())
   }
+
   /// Update game state, NPC behaviors, environment changes, etc.
   fn update(&mut self) -> Result<(), GameError> {
     Ok(())
   }
+
   /// Send updates to players or render the game state in some form.
   fn process_output(&mut self) -> Result<(), GameError> {
     self

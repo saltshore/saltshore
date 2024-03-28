@@ -61,7 +61,6 @@ mod tests {
   use super::*;
   use crate::test_utils;
   use std::io::BufWriter;
-  use std::io::Write;
   use tempfile::NamedTempFile;
 
   #[test]
