@@ -57,10 +57,9 @@ pub mod prelude {
 #[cfg(test)]
 pub mod test_utils {
 
-  use std::env;
-
   #[allow(unused_imports)]
   use super::*;
+  use std::env;
 
   /// Call this function at the beginning of each test.
   pub fn init() {
