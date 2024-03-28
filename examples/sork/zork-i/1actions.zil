@@ -7,6 +7,16 @@
 // The infamous white house.
 // If you've managed to get all of the trophies into the trophy case, then
 // there is a secret path leading southwest into the forest.
+//
+// The "won-flag" is interesting; how will we implement it in SaltShore without
+// having Zork-bespoke logic? One possibility is to implement the entirety of
+// Zork as an area with a quest, and check for completion of the quest. This
+// leads to further questions; how will we implement the loading of locations,
+// objects, entities, etc? And custom commands?
+//
+// Sork uses SaltShore as a library, so we _could_ leave that out... but in my
+// mind, the success of this project is inversely proportional to how much code
+// is in this example.
 
 <ROUTINE WEST-HOUSE (RARG)
 	 <COND (<EQUAL? .RARG ,M-LOOK>
@@ -17,6 +27,9 @@ front door.">
 		       <TELL
 " A secret path leads southwest into the forest.">)>
 		<CRLF>)>>
+
+// The first custom door. This will be an interesting bit of work, further
+// complicating the already messy concept of doors and passageways...
 
 <ROUTINE EAST-HOUSE (RARG)
 	 <COND (<EQUAL? .RARG ,M-LOOK>
