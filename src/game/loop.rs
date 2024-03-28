@@ -70,7 +70,7 @@ where
     // We check to see if we still have any commands in the queue; if we do, we
     // will execute them and return early.
     if let Some(command) = self.state.dequeue_command() {
-      command.execute(&mut self.state);
+      self.handle_command(command)?;
       return Ok(());
     }
 
@@ -79,7 +79,7 @@ where
       // If we have unparsed input, we will dequeue and attempt to parse it.
       while let Some(input) = self.state.dequeue_input() {
         match self.parser.parse(&input) {
-          Ok(command) => self.handle_command(command)?,
+          Ok(command) => self.state.enqueue_command(command),
           Err(_) => {
             self.handle_invalid_input(&input)?;
             return Ok(());
@@ -90,9 +90,7 @@ where
       self.output.prompt()?;
       // When we have input, we will read it and enqueue it for processing.
       match self.input.read_inputs()? {
-        Some(inputs) => {
-          self.state.enqueue_inputs(inputs);
-        },
+        Some(inputs) => self.state.enqueue_inputs(inputs),
         None => {
           // This means we received an EOF.
           self.state.set_quit_flag(true);
@@ -126,12 +124,20 @@ where
       .output
       .writeln(&format!("I'm sorry, I don't understand '{}'.", input))?;
     self.state.clear_input_queue();
+    self.state.clear_command_queue();
     Ok(())
   }
 
   /// Handle a valid command.
   fn handle_command(&mut self, command: Command) -> Result<(), GameError> {
-    command.execute(&mut self.state);
+    match command.execute(&mut self.state) {
+      Ok(_) => (),
+      Err(error) => {
+        self.state.clear_input_queue();
+        self.state.clear_command_queue();
+        self.output.writeln(&format!("Error: {}", error))?;
+      },
+    }
     Ok(())
   }
 }
@@ -171,26 +177,29 @@ impl Default for GameLoop<StdinLock<'static>, Stdout> {
 #[cfg(test)]
 mod tests {
   use super::*;
+  use crate::command::prelude::CommandError;
   use crate::command::prelude::{Command, QuitCommand};
   use crate::input::prelude::MockReader;
   use crate::output::prelude::MockWriter;
   use tempfile::NamedTempFile;
 
   #[test]
-  fn test_run() {
+  fn test_run() -> Result<(), CommandError> {
     let mut game_loop = GameLoop::new_with_stdio();
     let quit_command = Command::Quit(QuitCommand);
-    quit_command.execute(&mut game_loop.state);
+    quit_command.execute(&mut game_loop.state)?;
     assert!(game_loop.run().is_ok());
+    Ok(())
   }
 
   #[test]
-  fn test_is_finished() {
+  fn test_is_finished() -> Result<(), CommandError> {
     let mut game_loop = GameLoop::new_with_stdio();
     assert_eq!(game_loop.is_finished(), false);
     let quit_command = Command::Quit(QuitCommand);
-    quit_command.execute(&mut game_loop.state);
+    quit_command.execute(&mut game_loop.state)?;
     assert!(game_loop.is_finished());
+    Ok(())
   }
 
   #[test]

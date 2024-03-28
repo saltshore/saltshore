@@ -65,6 +65,11 @@ impl GameState {
   pub fn dequeue_command(&mut self) -> Option<Command> {
     self.command_queue.pop_front()
   }
+
+  /// Clear the command queue.
+  pub fn clear_command_queue(&mut self) {
+    self.command_queue.clear();
+  }
 }
 
 #[cfg(test)]
