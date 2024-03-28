@@ -17,3 +17,18 @@ impl GameState {
     self.quit_flag = flag;
   }
 }
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+  use crate::test_utils;
+
+  #[test]
+  fn test_quit_flag() {
+    test_utils::init();
+    let mut game_state = GameState::default();
+    assert_eq!(game_state.quit_flag(), false);
+    game_state.set_quit_flag(true);
+    assert_eq!(game_state.quit_flag(), true);
+  }
+}
