@@ -70,6 +70,12 @@ impl GameState {
   pub fn clear_command_queue(&mut self) {
     self.command_queue.clear();
   }
+
+  /// Clear the input and command queues.
+  pub fn clear_input_and_command_queues(&mut self) {
+    self.clear_input_queue();
+    self.clear_command_queue();
+  }
 }
 
 #[cfg(test)]

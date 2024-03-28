@@ -28,4 +28,5 @@ anyhow = { version = "1.0.81", features = ["std", "backtrace"] }
 thiserror = "1.0.58"
 
 [dev-dependencies]
+pretty_assertions = "1.4.0"
 tempfile = "3.10.1"
