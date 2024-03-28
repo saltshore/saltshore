@@ -34,27 +34,32 @@
 #[macro_use]
 extern crate anyhow;
 
+/// Commands that the player can issue.
+pub mod command;
 /// The game loop and game state.
 pub mod game;
 /// Basic input handling.
 pub mod input;
 /// Basic output handling.
 pub mod output;
+/// Parser for player input.
+pub mod parser;
 
 /// Prelude for the library.
 pub mod prelude {
+  pub use crate::command::prelude::*;
   pub use crate::game::prelude::*;
   pub use crate::input::prelude::*;
   pub use crate::output::prelude::*;
+  pub use crate::parser::prelude::*;
 }
 
 #[cfg(test)]
 pub mod test_utils {
 
-  use std::env;
-
   #[allow(unused_imports)]
   use super::*;
+  use std::env;
 
   /// Call this function at the beginning of each test.
   pub fn init() {
