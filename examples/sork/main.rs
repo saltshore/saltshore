@@ -39,8 +39,6 @@ fn main() -> Result<(), GameError> {
   let mut game_loop = GameLoop::default();
   game_loop.run()?;
   Ok(())
-  // As a player, I need to be able to enter commands so that I can interact
-  // with the game. See #8.
   // As a player, I need to be able to see the game state so that I can
   // understand the game. See #9.
   // As an engineer, I need to be able to log so I can debug. See #10.

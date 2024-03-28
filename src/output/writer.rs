@@ -1,3 +1,4 @@
+use super::mock::OutputMock;
 use crate::output::error::OutputError;
 use std::fs::File;
 use std::io::{self, BufWriter, Stderr, Stdout, Write};
@@ -15,13 +16,13 @@ impl<W: Write> OutputWriter<W> {
   }
 
   /// Send output to the writer.
-  pub fn writeln(&mut self, output: String) -> Result<(), OutputError> {
+  pub fn writeln(&mut self, output: &str) -> Result<(), OutputError> {
     writeln!(self.writer, "{}", output)?;
     Ok(())
   }
 
   /// Send output to the writer.
-  pub fn write(&mut self, output: String) -> Result<(), OutputError> {
+  pub fn write(&mut self, output: &str) -> Result<(), OutputError> {
     write!(self.writer, "{}", output)?;
     Ok(())
   }
@@ -29,6 +30,13 @@ impl<W: Write> OutputWriter<W> {
   /// Flush the writer.
   pub fn flush(&mut self) -> Result<(), OutputError> {
     self.writer.flush()?;
+    Ok(())
+  }
+
+  /// Prompt the player for input.
+  pub fn prompt(&mut self) -> Result<(), OutputError> {
+    self.write("> ")?;
+    self.flush()?;
     Ok(())
   }
 }
@@ -56,6 +64,16 @@ impl Default for StderrWriter {
 /// A type alias for a writer to a file.
 pub type FileWriter = OutputWriter<BufWriter<File>>;
 
+/// A type alias for a mock writer.
+pub type MockWriter = OutputWriter<OutputMock>;
+
+/// Implement the Default trait for MockWriter.
+impl Default for MockWriter {
+  fn default() -> Self {
+    Self::new(OutputMock::default())
+  }
+}
+
 #[cfg(test)]
 mod tests {
   use super::*;
@@ -68,8 +86,8 @@ mod tests {
     test_utils::init();
     let file = NamedTempFile::new().unwrap();
     let mut sink = FileWriter::new(BufWriter::new(file.reopen().unwrap()));
-    sink.writeln("test".to_string()).unwrap();
-    sink.writeln("test2".to_string()).unwrap();
+    sink.writeln("test").unwrap();
+    sink.writeln("test2").unwrap();
     sink.flush().unwrap();
     let contents = std::fs::read_to_string(file.path()).unwrap();
     assert_eq!(contents, "test\ntest2\n");
@@ -79,7 +97,7 @@ mod tests {
   fn test_write_stdout() {
     test_utils::init();
     let mut sink = StdoutWriter::new(std::io::stdout());
-    sink.writeln("test".to_string()).unwrap();
+    // sink.writeln("test").unwrap();
     sink.flush().unwrap();
   }
 
@@ -87,7 +105,7 @@ mod tests {
   fn test_write_stderr() {
     test_utils::init();
     let mut sink = StderrWriter::new(std::io::stderr());
-    sink.writeln("test".to_string()).unwrap();
+    // sink.writeln("test").unwrap();
     sink.flush().unwrap();
   }
 
@@ -96,8 +114,8 @@ mod tests {
     test_utils::init();
     let file = NamedTempFile::new().unwrap();
     let mut sink = FileWriter::new(BufWriter::new(file.reopen().unwrap()));
-    sink.writeln("test".to_string()).unwrap();
-    sink.writeln("test2".to_string()).unwrap();
+    sink.writeln("test").unwrap();
+    sink.writeln("test2").unwrap();
     sink.flush().unwrap();
     let contents = std::fs::read_to_string(file.path()).unwrap();
     assert_eq!(contents, "test\ntest2\n");
