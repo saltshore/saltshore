@@ -160,12 +160,7 @@ impl GameLoop<BufReader<File>, BufWriter<File>> {
 
 impl Default for GameLoop<StdinLock<'static>, Stdout> {
   fn default() -> Self {
-    GameLoop {
-      state: GameState::default(),
-      input: StdinReader::default(),
-      output: StdoutWriter::default(),
-      parser: Parser,
-    }
+    GameLoop::new_with_stdio()
   }
 }
 
@@ -175,6 +170,7 @@ mod tests {
   use crate::command::prelude::{Command, QuitCommand};
   use crate::input::prelude::MockReader;
   use crate::output::prelude::MockWriter;
+  use tempfile::NamedTempFile;
 
   #[test]
   fn test_run() {
@@ -226,5 +222,12 @@ mod tests {
   fn test_teardown() {
     let mut game_loop = GameLoop::new_with_stdio();
     assert!(game_loop.teardown().is_ok());
+  }
+
+  #[test]
+  fn test_default() {
+    let temp_file = NamedTempFile::new().unwrap();
+    let game_loop = GameLoop::new_with_files(temp_file.path().to_str().unwrap(), temp_file.path().to_str().unwrap());
+    assert_eq!(game_loop.state.quit_flag(), false);
   }
 }
