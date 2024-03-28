@@ -24,3 +24,24 @@ impl Parser {
     }
   }
 }
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+  use crate::command::prelude::{Command, QuitCommand};
+
+  #[test]
+  fn test_parse() {
+    let parser = Parser::new();
+    let command = parser.parse("quit");
+    assert!(command.is_ok());
+    assert_eq!(command.unwrap(), Command::Quit(QuitCommand));
+  }
+
+  #[test]
+  fn test_parse_invalid() {
+    let parser = Parser::new();
+    let command = parser.parse("invalid");
+    assert!(command.is_err());
+  }
+}

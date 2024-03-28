@@ -1,7 +1,7 @@
 use crate::game::prelude::GameState;
 
 /// Quit command.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct QuitCommand;
 
 impl QuitCommand {

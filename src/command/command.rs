@@ -3,7 +3,7 @@ use crate::game::prelude::GameState;
 use super::commands::*;
 
 /// Actual commands that can be executed.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Command {
   /// Quit command.
   Quit(QuitCommand),
