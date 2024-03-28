@@ -66,6 +66,13 @@ impl Default for MockReader {
   }
 }
 
+impl MockReader {
+  /// Add a line of input to the mock reader.
+  pub fn add_line(&mut self, line: String) {
+    self.reader.add_line(line);
+  }
+}
+
 #[cfg(test)]
 mod tests {
   use super::*;

@@ -151,4 +151,14 @@ mod tests {
     assert_eq!(game_state.input_queue.len(), 0);
     assert_eq!(game_state.command_queue.len(), 0);
   }
+
+  #[test]
+  fn test_clear_command_queue() {
+    test_utils::init();
+    let mut game_state = GameState::default();
+    game_state.enqueue_command(Command::Quit(QuitCommand));
+    assert_eq!(game_state.command_queue.len(), 1);
+    game_state.clear_command_queue();
+    assert_eq!(game_state.command_queue.len(), 0);
+  }
 }

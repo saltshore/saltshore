@@ -41,4 +41,26 @@ mod tests {
     assert_eq!(game_state.quit_flag(), true);
     Ok(())
   }
+
+  #[test]
+  fn test_execute_succeed() -> Result<(), CommandError> {
+    test_utils::init();
+    let mut game_state = GameState::default();
+    let command = Command::Succeed(SucceedCommand);
+    command.execute(&mut game_state)?;
+    Ok(())
+  }
+
+  #[test]
+  fn test_execute_throw_error() -> Result<(), CommandError> {
+    test_utils::init();
+    let mut game_state = GameState::default();
+    let command = Command::ThrowError(ThrowErrorCommand {
+      error: CommandError::InCharacter("Test error.".to_string()),
+    });
+    let result = command.execute(&mut game_state);
+    assert_eq!(result.is_err(), true);
+    assert_eq!(result.unwrap_err().to_string(), "Test error.");
+    Ok(())
+  }
 }

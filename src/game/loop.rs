@@ -193,6 +193,21 @@ mod tests {
   }
 
   #[test]
+  fn test_run2() -> Result<(), CommandError> {
+    let mut mock_reader = MockReader::default();
+    mock_reader.add_line("test".to_string());
+    mock_reader.add_line("quit".to_string());
+    let mut game_loop = GameLoop {
+      state: GameState::default(),
+      input: mock_reader,
+      output: MockWriter::default(),
+      parser: Parser,
+    };
+    assert!(game_loop.run().is_ok());
+    Ok(())
+  }
+
+  #[test]
   fn test_is_finished() -> Result<(), CommandError> {
     let mut game_loop = GameLoop::new_with_stdio();
     assert_eq!(game_loop.is_finished(), false);
@@ -210,9 +225,12 @@ mod tests {
 
   #[test]
   fn test_process_input() {
+    let mut mock_reader = MockReader::default();
+    mock_reader.add_line("test".to_string());
+    mock_reader.add_line("quit".to_string());
     let mut game_loop = GameLoop {
       state: GameState::default(),
-      input: MockReader::default(),
+      input: mock_reader,
       output: MockWriter::default(),
       parser: Parser,
     };
