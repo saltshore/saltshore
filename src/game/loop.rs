@@ -1,3 +1,4 @@
+use crate::command::prelude::Command;
 use crate::game::error::GameError;
 use crate::game::state::GameState;
 use crate::input::prelude::InputReader;
@@ -34,20 +35,19 @@ where
 {
   /// The actual game loop.
   pub fn run(&mut self) -> Result<(), GameError> {
-    // Initialize game world, load assets, etc.
     self.setup()?;
-    // The inner core of the game loop.
-    // Until we have been told to quit...
+    self.run_inner()?;
+    self.teardown()?;
+    Ok(())
+  }
+
+  /// The inner core of the game loop.
+  pub fn run_inner(&mut self) -> Result<(), GameError> {
     while !self.is_finished() {
-      // Send updates to the player or render the game state in some form.
       self.process_output()?;
-      // Handle player commands or AI decisions.
       self.process_input()?;
-      // Update game state, NPC behaviors, environment changes, etc.
       self.update()?;
     }
-    // Perform any necessary cleanup before the game loop exits.
-    self.teardown()?;
     Ok(())
   }
 
@@ -79,19 +79,10 @@ where
       // If we have unparsed input, we will dequeue and attempt to parse it.
       while let Some(input) = self.state.dequeue_input() {
         match self.parser.parse(&input) {
-          Ok(command) => {
-            command.execute(&mut self.state);
-            return Ok(());
-          },
+          Ok(command) => self.handle_command(command)?,
           Err(_) => {
-            // If the input could not be parsed as a command, we will inform the
-            // player and prompt them to try again; we will also empty the input
-            // queue to reduce the likelihood of the player going down the wrong
-            // path because of a simple typo.
-            self
-              .output
-              .writeln(&format!("I'm sorry, I don't understand \"{}\".", input))?;
-            self.state.clear_input_queue();
+            self.handle_invalid_input(&input)?;
+            return Ok(());
           },
         }
       }
@@ -100,9 +91,7 @@ where
       // When we have input, we will read it and enqueue it for processing.
       match self.input.read_inputs()? {
         Some(inputs) => {
-          for input in inputs {
-            self.state.enqueue_input(input);
-          }
+          self.state.enqueue_inputs(inputs);
         },
         None => {
           // This means we received an EOF.
@@ -128,6 +117,21 @@ where
 
   /// Perform any necessary cleanup before the game loop exits.
   fn teardown(&mut self) -> Result<(), GameError> {
+    Ok(())
+  }
+
+  /// Handle invalid input.
+  fn handle_invalid_input(&mut self, input: &str) -> Result<(), GameError> {
+    self
+      .output
+      .writeln(&format!("I'm sorry, I don't understand '{}'.", input))?;
+    self.state.clear_input_queue();
+    Ok(())
+  }
+
+  /// Handle a valid command.
+  fn handle_command(&mut self, command: Command) -> Result<(), GameError> {
+    command.execute(&mut self.state);
     Ok(())
   }
 }

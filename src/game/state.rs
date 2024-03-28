@@ -34,6 +34,13 @@ impl GameState {
     self.quit_flag = flag;
   }
 
+  /// Enqueue multiple inputs.
+  pub fn enqueue_inputs(&mut self, inputs: Vec<String>) {
+    inputs
+      .iter()
+      .for_each(|input| self.input_queue.push_back(input.clone()));
+  }
+
   /// Enqueue an input.
   pub fn enqueue_input(&mut self, input: String) {
     self.input_queue.push_back(input);
@@ -74,6 +81,16 @@ mod tests {
     assert_eq!(game_state.quit_flag(), false);
     game_state.set_quit_flag(true);
     assert_eq!(game_state.quit_flag(), true);
+  }
+
+  #[test]
+  fn test_enqueue_inputs() {
+    test_utils::init();
+    let mut game_state = GameState::default();
+    game_state.enqueue_inputs(vec!["test".to_string(), "test2".to_string()]);
+    assert_eq!(game_state.input_queue.len(), 2);
+    assert_eq!(game_state.input_queue[0], "test");
+    assert_eq!(game_state.input_queue[1], "test2");
   }
 
   #[test]
