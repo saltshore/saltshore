@@ -34,20 +34,19 @@ where
 {
   /// The actual game loop.
   pub fn run(&mut self) -> Result<(), GameError> {
-    // Initialize game world, load assets, etc.
     self.setup()?;
-    // The inner core of the game loop.
-    // Until we have been told to quit...
+    self.run_inner()?;
+    self.teardown()?;
+    Ok(())
+  }
+
+  /// The inner core of the game loop.
+  pub fn run_inner(&mut self) -> Result<(), GameError> {
     while !self.is_finished() {
-      // Send updates to the player or render the game state in some form.
       self.process_output()?;
-      // Handle player commands or AI decisions.
       self.process_input()?;
-      // Update game state, NPC behaviors, environment changes, etc.
       self.update()?;
     }
-    // Perform any necessary cleanup before the game loop exits.
-    self.teardown()?;
     Ok(())
   }
 
@@ -63,54 +62,43 @@ where
 
   /// Handle player commands.
   fn process_input(&mut self) -> Result<(), GameError> {
-    // We will read the player's input and attempt to parse it as a command; if
-    // the command is valid, we will execute it. If the command is invalid, we
-    // will inform the player and prompt them to try again.
-
-    // We check to see if we still have any commands in the queue; if we do, we
-    // will execute them and return early.
-    if let Some(command) = self.state.dequeue_command() {
-      command.execute(&mut self.state);
-      return Ok(());
-    }
-
-    // If we have no input to process, we will prompt the player for input.
-    loop {
-      // If we have unparsed input, we will dequeue and attempt to parse it.
-      while let Some(input) = self.state.dequeue_input() {
-        match self.parser.parse(&input) {
-          Ok(command) => {
-            command.execute(&mut self.state);
-            return Ok(());
-          },
-          Err(_) => {
-            // If the input could not be parsed as a command, we will inform the
-            // player and prompt them to try again; we will also empty the input
-            // queue to reduce the likelihood of the player going down the wrong
-            // path because of a simple typo.
-            self
-              .output
-              .writeln(&format!("I'm sorry, I don't understand \"{}\".", input))?;
-            self.state.clear_input_queue();
-          },
+    // We will loop until we've successfully executed a command.
+    let mut command_executed = false;
+    while !command_executed {
+      while self.state.command_queue.is_empty() {
+        while self.state.input_queue.is_empty() {
+          self.output.prompt()?;
+          match self.input.read_inputs()? {
+            Some(inputs) => self.state.enqueue_inputs(inputs),
+            None => {
+              // EOF
+              self.state.set_quit_flag(true);
+              return Ok(());
+            },
+          }
+        }
+        if let Some(input) = self.state.dequeue_input() {
+          if let Ok(command) = self.parser.parse(&input) {
+            self.state.enqueue_command(command);
+          } else {
+            self.handle_invalid_input(&input)?;
+          }
+        } else {
+          self.state.clear_input_and_command_queues();
         }
       }
-      // If we have no input to process, we will prompt the player for input.
-      self.output.prompt()?;
-      // When we have input, we will read it and enqueue it for processing.
-      match self.input.read_inputs()? {
-        Some(inputs) => {
-          for input in inputs {
-            self.state.enqueue_input(input);
-          }
-        },
-        None => {
-          // This means we received an EOF.
-          self.state.set_quit_flag(true);
-          return Ok(());
-        },
+      if let Some(command) = self.state.dequeue_command() {
+        let result = command.execute(&mut self.state);
+        command_executed = result.is_ok();
+        if let Err(error) = result {
+          self.output.writeln(&format!("Error: {}", error))?;
+          self.state.clear_input_and_command_queues();
+        }
+      } else {
+        self.state.clear_input_and_command_queues();
       }
     }
+    Ok(())
   }
 
   /// Update game state, NPC behaviors, environment changes, etc.
@@ -128,6 +116,16 @@ where
 
   /// Perform any necessary cleanup before the game loop exits.
   fn teardown(&mut self) -> Result<(), GameError> {
+    Ok(())
+  }
+
+  /// Handle invalid input.
+  fn handle_invalid_input(&mut self, input: &str) -> Result<(), GameError> {
+    self
+      .output
+      .writeln(&format!("I'm sorry, I don't understand '{}'.", input))?;
+    self.state.clear_input_queue();
+    self.state.clear_command_queue();
     Ok(())
   }
 }
@@ -160,37 +158,149 @@ impl GameLoop<BufReader<File>, BufWriter<File>> {
 
 impl Default for GameLoop<StdinLock<'static>, Stdout> {
   fn default() -> Self {
-    GameLoop {
-      state: GameState::default(),
-      input: StdinReader::default(),
-      output: StdoutWriter::default(),
-      parser: Parser,
-    }
+    GameLoop::new_with_stdio()
   }
 }
 
 #[cfg(test)]
 mod tests {
   use super::*;
+  use crate::command::prelude::CommandError;
   use crate::command::prelude::{Command, QuitCommand};
   use crate::input::prelude::MockReader;
   use crate::output::prelude::MockWriter;
+  use pretty_assertions::assert_eq;
+  use tempfile::NamedTempFile;
 
   #[test]
-  fn test_run() {
+  fn test_run() -> Result<(), CommandError> {
     let mut game_loop = GameLoop::new_with_stdio();
     let quit_command = Command::Quit(QuitCommand);
-    quit_command.execute(&mut game_loop.state);
+    quit_command.execute(&mut game_loop.state)?;
     assert!(game_loop.run().is_ok());
+    Ok(())
   }
 
   #[test]
-  fn test_is_finished() {
+  fn test_run_invalid_command_and_quit() -> Result<(), CommandError> {
+    let mut mock_reader = MockReader::default();
+    mock_reader.add_line("invalid".to_string());
+    mock_reader.add_line("quit".to_string());
+    let mut game_loop = GameLoop {
+      state: GameState::default(),
+      input: mock_reader,
+      output: MockWriter::default(),
+      parser: Parser,
+    };
+    assert!(game_loop.run().is_ok());
+    assert_eq!(
+      game_loop.output.output(),
+      vec![
+        "You are standing in an open field west of a white house, with a boarded front door.",
+        "\n",
+        "> ",
+        "I'm sorry, I don't understand 'invalid'.",
+        "\n",
+        "> ",
+      ]
+    );
+    Ok(())
+  }
+
+  #[test]
+  fn test_run_quit() -> Result<(), CommandError> {
+    let mut mock_reader = MockReader::default();
+    mock_reader.add_line("quit".to_string());
+    let mut game_loop = GameLoop {
+      state: GameState::default(),
+      input: mock_reader,
+      output: MockWriter::default(),
+      parser: Parser,
+    };
+    assert!(game_loop.run().is_ok());
+    assert_eq!(
+      game_loop.output.output(),
+      vec![
+        "You are standing in an open field west of a white house, with a boarded front door.",
+        "\n",
+        "> ",
+      ]
+    );
+    Ok(())
+  }
+
+  #[test]
+  fn test_run_succeed() -> Result<(), CommandError> {
+    let mut mock_reader = MockReader::default();
+    mock_reader.add_line("debug:succeed".to_string());
+    let mut game_loop = GameLoop {
+      state: GameState::default(),
+      input: mock_reader,
+      output: MockWriter::default(),
+      parser: Parser,
+    };
+    assert!(game_loop.run().is_ok());
+    assert_eq!(
+      game_loop.output.output(),
+      vec![
+        "You are standing in an open field west of a white house, with a boarded front door.",
+        "\n",
+        "> ",
+        "You are standing in an open field west of a white house, with a boarded front door.",
+        "\n",
+        "> ",
+      ]
+    );
+    Ok(())
+  }
+
+  #[test]
+  fn test_run_throw_ic_error() -> Result<(), CommandError> {
+    let mut mock_reader = MockReader::default();
+    mock_reader.add_line("debug:throw_error:ic".to_string());
+    let mut game_loop = GameLoop {
+      state: GameState::default(),
+      input: mock_reader,
+      output: MockWriter::default(),
+      parser: Parser,
+    };
+    assert!(game_loop.run().is_ok());
+    assert_eq!(
+      game_loop.output.output(),
+      vec![
+        "You are standing in an open field west of a white house, with a boarded front door.",
+        "\n",
+        "> ",
+        "Error: Test error.",
+        "\n",
+        "> ",
+      ]
+    );
+    Ok(())
+  }
+
+  #[test]
+  fn test_run_throw_oc_error() -> Result<(), CommandError> {
+    let mut mock_reader = MockReader::default();
+    mock_reader.add_line("debug:throw_error:oc".to_string());
+    let mut game_loop = GameLoop {
+      state: GameState::default(),
+      input: mock_reader,
+      output: MockWriter::default(),
+      parser: Parser,
+    };
+    assert!(game_loop.run().is_ok());
+    Ok(())
+  }
+
+  #[test]
+  fn test_is_finished() -> Result<(), CommandError> {
     let mut game_loop = GameLoop::new_with_stdio();
     assert_eq!(game_loop.is_finished(), false);
     let quit_command = Command::Quit(QuitCommand);
-    quit_command.execute(&mut game_loop.state);
+    quit_command.execute(&mut game_loop.state)?;
     assert!(game_loop.is_finished());
+    Ok(())
   }
 
   #[test]
@@ -201,9 +311,12 @@ mod tests {
 
   #[test]
   fn test_process_input() {
+    let mut mock_reader = MockReader::default();
+    mock_reader.add_line("test".to_string());
+    mock_reader.add_line("quit".to_string());
     let mut game_loop = GameLoop {
       state: GameState::default(),
-      input: MockReader::default(),
+      input: mock_reader,
       output: MockWriter::default(),
       parser: Parser,
     };
@@ -226,5 +339,12 @@ mod tests {
   fn test_teardown() {
     let mut game_loop = GameLoop::new_with_stdio();
     assert!(game_loop.teardown().is_ok());
+  }
+
+  #[test]
+  fn test_default() {
+    let temp_file = NamedTempFile::new().unwrap();
+    let game_loop = GameLoop::new_with_files(temp_file.path().to_str().unwrap(), temp_file.path().to_str().unwrap());
+    assert_eq!(game_loop.state.quit_flag(), false);
   }
 }

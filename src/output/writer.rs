@@ -74,6 +74,14 @@ impl Default for MockWriter {
   }
 }
 
+/// Implement the MockWriter.
+impl MockWriter {
+  /// Get the output from the mock writer.
+  pub fn output(&self) -> Vec<String> {
+    self.writer.output.clone()
+  }
+}
+
 #[cfg(test)]
 mod tests {
   use super::*;

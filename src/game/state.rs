@@ -34,6 +34,13 @@ impl GameState {
     self.quit_flag = flag;
   }
 
+  /// Enqueue multiple inputs.
+  pub fn enqueue_inputs(&mut self, inputs: Vec<String>) {
+    inputs
+      .iter()
+      .for_each(|input| self.input_queue.push_back(input.clone()));
+  }
+
   /// Enqueue an input.
   pub fn enqueue_input(&mut self, input: String) {
     self.input_queue.push_back(input);
@@ -58,11 +65,24 @@ impl GameState {
   pub fn dequeue_command(&mut self) -> Option<Command> {
     self.command_queue.pop_front()
   }
+
+  /// Clear the command queue.
+  pub fn clear_command_queue(&mut self) {
+    self.command_queue.clear();
+  }
+
+  /// Clear the input and command queues.
+  pub fn clear_input_and_command_queues(&mut self) {
+    self.clear_input_queue();
+    self.clear_command_queue();
+  }
 }
 
 #[cfg(test)]
 mod tests {
   use super::*;
+  use crate::command::prelude::Command;
+  use crate::command::prelude::QuitCommand;
   use crate::test_utils;
 
   #[test]
@@ -72,5 +92,79 @@ mod tests {
     assert_eq!(game_state.quit_flag(), false);
     game_state.set_quit_flag(true);
     assert_eq!(game_state.quit_flag(), true);
+  }
+
+  #[test]
+  fn test_enqueue_inputs() {
+    test_utils::init();
+    let mut game_state = GameState::default();
+    game_state.enqueue_inputs(vec!["test".to_string(), "test2".to_string()]);
+    assert_eq!(game_state.input_queue.len(), 2);
+    assert_eq!(game_state.input_queue[0], "test");
+    assert_eq!(game_state.input_queue[1], "test2");
+  }
+
+  #[test]
+  fn test_enqueue_input() {
+    test_utils::init();
+    let mut game_state = GameState::default();
+    game_state.enqueue_input("test".to_string());
+    assert_eq!(game_state.input_queue.len(), 1);
+  }
+
+  #[test]
+  fn test_dequeue_input() {
+    test_utils::init();
+    let mut game_state = GameState::default();
+    game_state.enqueue_input("test".to_string());
+    let input = game_state.dequeue_input();
+    assert_eq!(input, Some("test".to_string()));
+    assert_eq!(game_state.input_queue.len(), 0);
+  }
+
+  #[test]
+  fn test_clear_input_queue() {
+    test_utils::init();
+    let mut game_state = GameState::default();
+    game_state.enqueue_input("test".to_string());
+    game_state.clear_input_queue();
+    assert_eq!(game_state.input_queue.len(), 0);
+  }
+
+  #[test]
+  fn test_enqueue_command() {
+    test_utils::init();
+    let mut game_state = GameState::default();
+    game_state.enqueue_command(Command::Quit(QuitCommand));
+    assert_eq!(game_state.command_queue.len(), 1);
+  }
+
+  #[test]
+  fn test_dequeue_command() {
+    test_utils::init();
+    let mut game_state = GameState::default();
+    game_state.enqueue_command(Command::Quit(QuitCommand));
+    let command = game_state.dequeue_command();
+    assert_eq!(command, Some(Command::Quit(QuitCommand)));
+    assert_eq!(game_state.command_queue.len(), 0);
+  }
+
+  #[test]
+  fn test_new() {
+    test_utils::init();
+    let game_state = GameState::new();
+    assert_eq!(game_state.quit_flag(), false);
+    assert_eq!(game_state.input_queue.len(), 0);
+    assert_eq!(game_state.command_queue.len(), 0);
+  }
+
+  #[test]
+  fn test_clear_command_queue() {
+    test_utils::init();
+    let mut game_state = GameState::default();
+    game_state.enqueue_command(Command::Quit(QuitCommand));
+    assert_eq!(game_state.command_queue.len(), 1);
+    game_state.clear_command_queue();
+    assert_eq!(game_state.command_queue.len(), 0);
   }
 }

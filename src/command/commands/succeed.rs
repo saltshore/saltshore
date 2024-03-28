@@ -1,14 +1,13 @@
 use crate::command::prelude::CommandError;
 use crate::game::prelude::GameState;
 
-/// Quit command.
+/// Succeed command, which vacuously succeeds.
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub struct QuitCommand;
+pub struct SucceedCommand;
 
-impl QuitCommand {
+impl SucceedCommand {
   /// Execute the command.
-  pub fn execute(&self, game_state: &mut GameState) -> Result<(), CommandError> {
-    game_state.set_quit_flag(true);
+  pub fn execute(&self, _game_state: &mut GameState) -> Result<(), CommandError> {
     Ok(())
   }
 }
@@ -23,10 +22,8 @@ mod tests {
   fn test_execute() -> Result<(), CommandError> {
     test_utils::init();
     let mut game_state = GameState::default();
-    let command = QuitCommand;
-    assert_eq!(game_state.quit_flag(), false);
+    let command = SucceedCommand;
     command.execute(&mut game_state)?;
-    assert_eq!(game_state.quit_flag(), true);
     Ok(())
   }
 }
